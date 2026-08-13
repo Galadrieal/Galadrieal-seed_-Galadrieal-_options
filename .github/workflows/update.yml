@@ -1,0 +1,36 @@
+name: Auto-Update Options Strikes
+
+on:
+  schedule:
+    # Runs at the top and bottom of every hour from 9:00 AM EST to 4:00 PM EST (Mon-Fri)
+    - cron: '0,30 13-21 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Python Script
+        run: python main.py
+
+      - name: Commit and Push to GitHub
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add *.csv
+          git commit -m "Auto-updated ES and NQ Strikes" || echo "No changes to commit"
+          git push
